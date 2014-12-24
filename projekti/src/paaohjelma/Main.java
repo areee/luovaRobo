@@ -1,33 +1,36 @@
 package paaohjelma;
 
-import javax.microedition.lcdui.Screen;
-
+import lejos.addon.gps.SimpleGPS;
 import lejos.nxt.*;
+import lejos.util.PilotProps;
+import lejos.robotics.navigation.*;
 
 public class Main {
 
 	public static void main(String[] args) {
-		// Testiohjelma, jolla tutustun NXT:n ja Eclipsen "vuorovaikutukseen"
-		// Teen tähän pohjaan myös lopullisen työni
+		
+		// Moottoreiden toiminnan testailua:
+		NXTRegulatedMotor motorA = Motor.A;
 
-		System.out.println("Paina jotakin" + "\nrobon painikkeista.");
+		motorA.setSpeed(150);
 
-		while (true) {
-			int aika = Button.waitForPress(5000);
-			System.out.println(aika);
-			if (aika == 2) {
-				System.out.println("Vasenta nappainta painettu.");
-			} else if (aika == 4) {
-				System.out.println("Oikeaa nappainta painettu.");
-			} else if (aika == 1) {
-				System.out.println("Enteria painettu.");
-			} else if (aika == 8) {
-				System.out.println("Escapea painettu.");
-			} else if (aika == 0) {
-				System.out.println(aika);
-				break;
-			}
-		}
+		motorA.rotate(360);
+
+		NXTRegulatedMotor motorC = Motor.C;
+
+		motorC.setSpeed(150);
+
+		motorC.rotate(360);
+
+		motorA.rotateTo(-1150);
+
+		motorC.rotateTo(-1150);
+		
+		// Ajoneuvon luominen (testailua myöskin):
+		// Kesken...
+		MoveController pilot = new DifferentialPilot(5.6f, 9.5f, motorA, motorC);
+		
+		NavPathController controller = new NavPathController(pilot);
 
 	}
 }
