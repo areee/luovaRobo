@@ -8,29 +8,36 @@ import lejos.robotics.navigation.*;
 public class Main {
 
 	public static void main(String[] args) {
-		
+
 		// Moottoreiden toiminnan testailua:
-		NXTRegulatedMotor motorA = Motor.A;
+		NXTRegulatedMotor vasenPyora = Motor.A;
+		vasenPyora.setSpeed(150);
 
-		motorA.setSpeed(150);
+		NXTRegulatedMotor oikeaPyora = Motor.C;
+		oikeaPyora.setSpeed(150);
 
-		motorA.rotate(360);
+		NXTRegulatedMotor kynamoottori = Motor.B;
+		kynamoottori.setSpeed(15);
 
-		NXTRegulatedMotor motorC = Motor.C;
+//		vasenPyora.rotateTo(-150);
+//
+//		oikeaPyora.rotateTo(-150);
 
-		motorC.setSpeed(150);
+//		kynamoottori.rotate(90);
+//		kynamoottori.rotate(-90);
 
-		motorC.rotate(360);
-
-		motorA.rotateTo(-1150);
-
-		motorC.rotateTo(-1150);
-		
 		// Ajoneuvon luominen (testailua myöskin):
 		// Kesken...
-		MoveController pilot = new DifferentialPilot(5.6f, 9.5f, motorA, motorC);
-		
+		MoveController pilot = new DifferentialPilot(5.6f, 9.0f, Motor.A, Motor.C);
+
 		NavPathController controller = new NavPathController(pilot);
+		
+		pilot.travel(-50);
+		
+		kynamoottori.rotate(90);
+		kynamoottori.rotate(-90);
+		
+		pilot.travel(50);
 
 	}
 }
