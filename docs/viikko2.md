@@ -1,7 +1,6 @@
-Viikon 2 raportti
-=================
+# Viikon 2 raportti
 
-# Tähän mennessä toteutettua
+## Tähän mennessä toteutettua
 
 * robotti, jossa
 	- moottoroidut pyörät
@@ -12,12 +11,12 @@ Viikon 2 raportti
 	- antaa ilmoituksia robotin näytöllä
 	- päästellä äänimerkkejä
 
-# Vastaan tulleita ongelmia
+## Vastaan tulleita ongelmia
 
 * firmwaren päivittämisessä tuli VirtualBoxin kanssa USB:n kautta yhdistämisongelmia, jotka ratkesivat irkkiä lukemalla
 * robolle sopivan kynän valinnassa ongelma: ainoastaan tussi tuottaa kunnolla näkyvää jälkeä, muut kynät liian heiveröisiä
 
-# Seuraavan viikon tavoitteita
+## Seuraavan viikon tavoitteita
 
 * parantaa robotin käytettävyyttä
 * luoda robotille näkökyky joko mukana tulevilla sensoreilla tai älypuhelimen kameralla
