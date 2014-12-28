@@ -20,3 +20,4 @@
 
 * parantaa robotin käytettävyyttä
 * luoda robotille näkökyky joko mukana tulevilla sensoreilla tai älypuhelimen kameralla
+* työstää valmiiksi robotin käyttöliittymän koodaus
