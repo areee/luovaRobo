@@ -1,3 +1,5 @@
+// Olen siirtämässä ohjelmaa tästä Main.javasta LuovaRobo.javaan...
+
 package paaohjelma;
 
 import lejos.nxt.*;
@@ -22,13 +24,11 @@ public class Main {
 
 		System.out.println("Hei, olen luova robotti!");
 		annaAanimerkkiA();
-
 		kynamoottori.rotate(45);
 
 		while (true) {
-			System.out.println("Mitä haluat minun piirtävän?");
-			// väliaikainen kooditason ratkaisu (parempi ratkaisu selvitystyön
-			// alla, pitää ottaa mallia LCDUI-esimerkistä...)
+			System.out.println("Mita haluat minun piirtavan?");
+
 			String komento = "";
 
 			System.out.println("Piirretaan...");
@@ -59,18 +59,18 @@ public class Main {
 		}
 	}
 
-	private static void annaAanimerkkiB() {
-		Sound.playNote(Sound.XYLOPHONE, 1047, 500);
-		Sound.playNote(Sound.XYLOPHONE, 784, 500);
-		Sound.playNote(Sound.XYLOPHONE, 659, 500);
-		Sound.playNote(Sound.XYLOPHONE, 523, 1000);
-	}
-
 	private static void annaAanimerkkiA() {
 		Sound.playNote(Sound.XYLOPHONE, 523, 500);
 		Sound.playNote(Sound.XYLOPHONE, 659, 500);
 		Sound.playNote(Sound.XYLOPHONE, 784, 500);
 		Sound.playNote(Sound.XYLOPHONE, 1047, 1000);
+	}
+
+	private static void annaAanimerkkiB() {
+		Sound.playNote(Sound.XYLOPHONE, 1047, 500);
+		Sound.playNote(Sound.XYLOPHONE, 784, 500);
+		Sound.playNote(Sound.XYLOPHONE, 659, 500);
+		Sound.playNote(Sound.XYLOPHONE, 523, 1000);
 	}
 
 	private static void piirraViiva(int koko, MoveController piirtaja) {
