@@ -4,26 +4,24 @@ package paaohjelma;
 
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.Choice;
-import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.Gauge;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
-import javax.microedition.lcdui.Item;
-import javax.microedition.lcdui.ItemCommandListener;
 import javax.microedition.lcdui.List;
-import javax.microedition.lcdui.Spacer;
 import javax.microedition.lcdui.TextBox;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.Ticker;
 import javax.microedition.lcdui.Font;
-import lejos.util.Timer;
-import lejos.util.TimerListener;
 import lejos.nxt.LCD;
+import lejos.nxt.Motor;
+import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.Sound;
+import lejos.robotics.navigation.ArcRotateMoveController;
+import lejos.robotics.navigation.DifferentialPilot;
+import lejos.robotics.navigation.MoveController;
 
 class Splasher extends Alert {
 	Image kuva;
@@ -120,177 +118,63 @@ public class LuovaRoboUI implements CommandListener {
 	private List valikko = new List("Komponentit", Choice.IMPLICIT);
 	private Ticker liikkuvaTekstikentta = new Ticker("Hei, olen luovaRobo!");
 
-	private TextBox syote = new TextBox("Lisaa tekstia:", "", 16, TextField.ANY);
-	private List valinnat = new List("Valitse kohteet",
-			Choice.MULTIPLE);
-	private Alert aaniHalytys = new Alert("Aanihalytys");
-	private Form lomake1 = new Form("Testilomake");
-	private Form lomake2 = new Form("Lomake eri asioille");
+	private TextBox syote = new TextBox("Anna pituus:", "", 16,
+			TextField.ANY);
 	private Alert lopetusHalytys = new Alert("Lopeta");
 
-	private Gauge halytysMittari = new Gauge(null, false, 20, 0);
-	private Timer mittariAjastin = new Timer(100, new TimerListener() {
-		public void timedOut() {
-			int curValue = halytysMittari.getValue();
-			if (curValue >= halytysMittari.getMaxValue()) {
-				mittariAjastin.stop();
-				halytysMittari.setValue(0);
-			} else {
-				halytysMittari.setValue(curValue + 1);
-			}
-			aaniHalytys.repaint();
-		}
-	});
-
-	private ChoiceGroup valintaryhma1 = new ChoiceGroup("Ponnahdusikkuna 1",
-			Choice.POPUP);
-	private ChoiceGroup valintaryhma2 = new ChoiceGroup("Ponnahdusikkuna 2",
-			Choice.POPUP);
-	private ChoiceGroup radionappulat = new ChoiceGroup(null, Choice.EXCLUSIVE);
-	private Image kuva = new Image(32, 32, new byte[] { (byte) 0xff,
-			(byte) 0x03, (byte) 0x05, (byte) 0x09, (byte) 0x11, (byte) 0x21,
-			(byte) 0x41, (byte) 0x81, (byte) 0x01, (byte) 0x01, (byte) 0x01,
-			(byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x01,
-			(byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x01,
-			(byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0x81, (byte) 0x41,
-			(byte) 0x21, (byte) 0x11, (byte) 0x09, (byte) 0x05, (byte) 0x03,
-			(byte) 0xff, (byte) 0xff, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01,
-			(byte) 0x02, (byte) 0x04, (byte) 0x08, (byte) 0x10, (byte) 0x20,
-			(byte) 0x40, (byte) 0x80, (byte) 0x80, (byte) 0x40, (byte) 0x20,
-			(byte) 0x10, (byte) 0x08, (byte) 0x04, (byte) 0x02, (byte) 0x01,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00, (byte) 0x80, (byte) 0x40, (byte) 0x20, (byte) 0x10,
-			(byte) 0x08, (byte) 0x04, (byte) 0x02, (byte) 0x01, (byte) 0x01,
-			(byte) 0x02, (byte) 0x04, (byte) 0x08, (byte) 0x10, (byte) 0x20,
-			(byte) 0x40, (byte) 0x80, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0xff,
-			(byte) 0xff, (byte) 0xc0, (byte) 0xa0, (byte) 0x90, (byte) 0x88,
-			(byte) 0x84, (byte) 0x82, (byte) 0x81, (byte) 0x80, (byte) 0x80,
-			(byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80,
-			(byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80,
-			(byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x81,
-			(byte) 0x82, (byte) 0x84, (byte) 0x88, (byte) 0x90, (byte) 0xa0,
-			(byte) 0xc0, (byte) 0xff });
-//	private Image loiske = new Image(26, 32, new byte[] { (byte) 0x00,
-//			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-//			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-//			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x3F, (byte) 0x3F,
-//			(byte) 0x3F, (byte) 0x3F, (byte) 0x3F, (byte) 0x3F, (byte) 0xFF,
-//			(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFE, (byte) 0xFC,
-//			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-//			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0xA0,
-//			(byte) 0x40, (byte) 0xA0, (byte) 0x40, (byte) 0xA0, (byte) 0x40,
-//			(byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-//			(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
-//			(byte) 0xFF, (byte) 0xF0, (byte) 0xF0, (byte) 0xF0, (byte) 0xF0,
-//			(byte) 0xF0, (byte) 0xF0, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-//			(byte) 0x0A, (byte) 0x05, (byte) 0x0A, (byte) 0x05, (byte) 0x0A,
-//			(byte) 0x05, (byte) 0x0A, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-//			(byte) 0x00, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
-//			(byte) 0xFF, (byte) 0xFF, (byte) 0x0F, (byte) 0x1F, (byte) 0x3F,
-//			(byte) 0x3F, (byte) 0x7F, (byte) 0x7F, (byte) 0xFC, (byte) 0xF8,
-//			(byte) 0xF0, (byte) 0xF0, (byte) 0xF0, (byte) 0xF0, (byte) 0xF0,
-//			(byte) 0xF0, (byte) 0xF0, (byte) 0xF0, (byte) 0xF0, (byte) 0xF0,
-//			(byte) 0xF8, (byte) 0xFC, (byte) 0x7F, (byte) 0x7F, (byte) 0x3F,
-//			(byte) 0x3F, (byte) 0x1F, (byte) 0x0F, });
-//	private Splasher logoKaynnistys = new Splasher(loiske, "luovaRobo", true);
-
-	private Gauge volyymimittari = new Gauge("Aanenvoimakkuus: ", true, 8, 6);
-	private Gauge mittari = new Gauge("Edistymispalkki", true, 20, 9);
 	TextField tekstikentta = new TextField("Tekstikentta", "abc", 16,
 			TextField.ANY);
 
 	private Display naytto;
+	
+	// vielä täysin kesken näiltä osin (rivit 131-140):
+	private NXTRegulatedMotor kynamoottori = Motor.B;
+//	kynamoottori.setSpeed(15);
+
+	private MoveController piirtaja = new DifferentialPilot(5.6f, 9.0f, Motor.A,
+			Motor.C);
+//	piirtaja.setTravelSpeed(5);
+
+	private ArcRotateMoveController ympyranPiirtaja = new DifferentialPilot(5.6f,
+			9.0f, Motor.A, Motor.C);
+//	ympyranPiirtaja.setTravelSpeed(5);
 
 	public LuovaRoboUI() {
 	}
 
+	// käynnistysääni:
+	private void annaAanimerkkiA() {
+		Sound.playNote(Sound.FLUTE, 523, 125);
+		Sound.playNote(Sound.FLUTE, 659, 125);
+		Sound.playNote(Sound.FLUTE, 784, 125);
+		Sound.playNote(Sound.FLUTE, 1047, 500);
+	}
+
+	// lopetusääni:
+	private void annaAanimerkkiB() {
+		Sound.playNote(Sound.FLUTE, 1047, 125);
+		Sound.playNote(Sound.FLUTE, 784, 125);
+		Sound.playNote(Sound.FLUTE, 659, 125);
+		Sound.playNote(Sound.FLUTE, 523, 500);
+	}
+
 	public void kaynnista(boolean polling) {
 		valikko = new List("Valitse toiminto", Choice.IMPLICIT);
-		valikko.append("Tekstiboksi", null);
-		valikko.append("Lista", null);
-		valikko.append("Halytys", null);
-		valikko.append("Lomake 1", null);
-		valikko.append("Lomake 2", null);
+		valikko.append("Piirra viiva", null);
+		valikko.append("Piirra ympyra", null);
+		valikko.append("Piirra nelio", null);
+		valikko.append("Piirra kolmio", null);
 		valikko.addCommand(LOPETA_KOMENTO);
 		valikko.setCommandListener(this);
 		valikko.setTicker(liikkuvaTekstikentta);
+		annaAanimerkkiA();
 
 		syote.addCommand(TAKAISIN_KOMENTO);
 		syote.setCommandListener(this);
 
-		valinnat.addCommand(TAKAISIN_KOMENTO);
-		valinnat.setCommandListener(this);
-		valinnat.append("Kohde 1", null);
-		valinnat.append("Kohde 2", null);
-		valinnat.append("Kohde 3", null);
-		valinnat.append("Kohde 4", null);
-		valinnat.append("Kohde 5", null);
-		valinnat.append("Kohde 6", null);
-		valinnat.append("Kohde 7", null);
-		valinnat.append("Kohde 8", null);
-		valinnat.append("Kohde 9", null);
-		valinnat.append("Kohde 10", null);
-
-		aaniHalytys.setType(Alert.ALERT_TYPE_ERROR);
-		aaniHalytys.setTimeout(5000);
-		aaniHalytys.setString("** HALYTYS **");
-		aaniHalytys.setIndicator(halytysMittari);
-
-		lomake1.append(valintaryhma1);
-		lomake1.append(valintaryhma2);
-		lomake1.append("Vasen");
-		lomake1.append(kuva);
-		lomake1.append(new Spacer(8, 8));
-		lomake1.append("Oikea");
-		lomake1.append(radionappulat);
-		lomake1.addCommand(TAKAISIN_KOMENTO);
-		lomake1.setCommandListener(this);
-
-		valintaryhma1.append("Valikko 1", null);
-		valintaryhma1.append("Valikko 2", null);
-		valintaryhma1.append("Valikko 3", null);
-		valintaryhma1.append("Valikko 4", null);
-		valintaryhma1.append("Valikko 5", null);
-		valintaryhma1.append("Valikko 6", null);
-		valintaryhma1.append("Valikko 7", null);
-		valintaryhma1.append("Valikko 8", null);
-		valintaryhma1.append("Valikko 9", null);
-		valintaryhma1.append("Valikko 10", null);
-
-		valintaryhma2.append("Vaihtoehto 1", null);
-		valintaryhma2.append("Vaihtoehto 2", null);
-		valintaryhma2.append("Vaihtoehto 3", null);
-		valintaryhma2.append("Vaihtoehto 4", null);
-		valintaryhma2.setScrollWrap(false);
-		valintaryhma2.setItemCommandListener(new ItemCommandListener() {
-			public void commandAction(Command c, Item d) {
-				radionappulat.setSelectedIndex(
-						valintaryhma2.getSelectedIndex() % 2, true);
-			}
-		});
-		valintaryhma2.addCommand(new Command(1, Command.SCREEN, 0));
-
-		radionappulat.append("Valinta 1", null);
-		radionappulat.append("Valinta 2", null);
-		radionappulat.setSelectedIndex(0, true);
-		radionappulat.setPreferredSize(Display.SCREEN_WIDTH,
-				2 * Display.CHAR_HEIGHT);
-
-		lomake2.append(volyymimittari);
-		lomake2.append(mittari);
-		lomake2.append(tekstikentta);
-		lomake2.addCommand(TAKAISIN_KOMENTO);
-		lomake2.setCommandListener(this);
-
 		naytto = Display.getDisplay();
 		naytto.setCurrent(valikko);
 
-//		logoKaynnistys.setTimeout(4000);
-//		naytto.setCurrent(logoKaynnistys);
 		naytto.show(polling);
 	}
 
@@ -298,7 +182,6 @@ public class LuovaRoboUI implements CommandListener {
 		if (c.getCommandId() == KOMENTO_TAKAISIN__ALKUUN) {
 			naytto.setCurrent(valikko);
 		} else if (c.getCommandId() == KOMENTO_LOPETA_OHJELMA) {
-
 			lopetusHalytys.setType(Alert.ALERT_TYPE_CONFIRMATION);
 			lopetusHalytys.setString("Lopetetaanko?");
 			lopetusHalytys.setCommandListener(this);
@@ -307,8 +190,7 @@ public class LuovaRoboUI implements CommandListener {
 
 			if (d == lopetusHalytys) {
 				if (lopetusHalytys.getConfirmation()) {
-//					logoKaynnistys.setStart(false);
-//					naytto.setCurrent(logoKaynnistys);
+					annaAanimerkkiB();
 					naytto.quit();
 				} else {
 					naytto.setCurrent(valikko);
@@ -318,15 +200,11 @@ public class LuovaRoboUI implements CommandListener {
 				if (list.getSelectedIndex() == 0) {
 					naytto.setCurrent(syote);
 				} else if (list.getSelectedIndex() == 1) {
-					naytto.setCurrent(valinnat);
+					naytto.setCurrent(syote);
 				} else if (list.getSelectedIndex() == 2) {
-					naytto.setCurrent(aaniHalytys);
-					halytysMittari.setValue(0);
-					mittariAjastin.start();
+					naytto.setCurrent(syote);
 				} else if (list.getSelectedIndex() == 3) {
-					naytto.setCurrent(lomake1);
-				} else if (list.getSelectedIndex() == 4) {
-					naytto.setCurrent(lomake2);
+					naytto.setCurrent(syote);
 				}
 			}
 		}
@@ -335,5 +213,4 @@ public class LuovaRoboUI implements CommandListener {
 	public static void main(String[] args) {
 		new LuovaRoboUI().kaynnista(true);
 	}
-
 }

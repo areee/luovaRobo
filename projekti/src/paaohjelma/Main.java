@@ -78,9 +78,9 @@ public class Main {
 		piirtaja.travel(koko);
 	}
 
-	private static void piirraYmpyra(int koko,
+	private static void piirraYmpyra(int sade,
 			ArcRotateMoveController ympyranPiirtaja) {
-		ympyranPiirtaja.arc(koko, 360);
+		ympyranPiirtaja.arc(sade, 360); // säde, kulma
 	}
 
 	private static void piirraNelio(int koko, MoveController piirtaja) {
