@@ -8,6 +8,7 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.List;
@@ -118,26 +119,30 @@ public class LuovaRoboUI implements CommandListener {
 	private List valikko = new List("Komponentit", Choice.IMPLICIT);
 	private Ticker liikkuvaTekstikentta = new Ticker("Hei, olen luovaRobo!");
 
-	private TextBox syote = new TextBox("Anna pituus:", "", 16,
-			TextField.ANY);
+	// "syote" turha? --> työn alla tekstikenttätoteutus...
+	private TextBox syote = new TextBox("Anna pituus:", "", 16, TextField.ANY);
+
 	private Alert lopetusHalytys = new Alert("Lopeta");
 
-	TextField tekstikentta = new TextField("Tekstikentta", "abc", 16,
+	private Form lomake = new Form("Piirroksen tiedot?");
+
+	TextField tekstikentta = new TextField("Anna pituus:", "", 16,
 			TextField.ANY);
 
 	private Display naytto;
-	
+
 	// vielä täysin kesken näiltä osin (rivit 131-140):
 	private NXTRegulatedMotor kynamoottori = Motor.B;
-//	kynamoottori.setSpeed(15);
+	// kynamoottori.setSpeed(15);
 
-	private MoveController piirtaja = new DifferentialPilot(5.6f, 9.0f, Motor.A,
-			Motor.C);
-//	piirtaja.setTravelSpeed(5);
+	private MoveController piirtaja = new DifferentialPilot(5.6f, 9.0f,
+			Motor.A, Motor.C);
+	// piirtaja.setTravelSpeed(5);
 
-	private ArcRotateMoveController ympyranPiirtaja = new DifferentialPilot(5.6f,
-			9.0f, Motor.A, Motor.C);
-//	ympyranPiirtaja.setTravelSpeed(5);
+	private ArcRotateMoveController ympyranPiirtaja = new DifferentialPilot(
+			5.6f, 9.0f, Motor.A, Motor.C);
+
+	// ympyranPiirtaja.setTravelSpeed(5);
 
 	public LuovaRoboUI() {
 	}
@@ -167,13 +172,17 @@ public class LuovaRoboUI implements CommandListener {
 		valikko.addCommand(LOPETA_KOMENTO);
 		valikko.setCommandListener(this);
 		valikko.setTicker(liikkuvaTekstikentta);
-		annaAanimerkkiA();
 
 		syote.addCommand(TAKAISIN_KOMENTO);
 		syote.setCommandListener(this);
 
+		lomake.append(tekstikentta);
+		lomake.addCommand(TAKAISIN_KOMENTO);
+		lomake.setCommandListener(this);
+
 		naytto = Display.getDisplay();
 		naytto.setCurrent(valikko);
+		annaAanimerkkiA();
 
 		naytto.show(polling);
 	}
@@ -197,13 +206,20 @@ public class LuovaRoboUI implements CommandListener {
 				}
 			} else if (d == valikko) {
 				List list = (List) naytto.getCurrent();
+
 				if (list.getSelectedIndex() == 0) {
+					naytto.setCurrent(lomake);
+				}
+
+				else if (list.getSelectedIndex() == 1) {
 					naytto.setCurrent(syote);
-				} else if (list.getSelectedIndex() == 1) {
+				}
+
+				else if (list.getSelectedIndex() == 2) {
 					naytto.setCurrent(syote);
-				} else if (list.getSelectedIndex() == 2) {
-					naytto.setCurrent(syote);
-				} else if (list.getSelectedIndex() == 3) {
+				}
+
+				else if (list.getSelectedIndex() == 3) {
 					naytto.setCurrent(syote);
 				}
 			}
