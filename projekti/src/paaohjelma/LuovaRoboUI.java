@@ -116,33 +116,33 @@ public class LuovaRoboUI implements CommandListener {
 	private static final Command LOPETA_KOMENTO = new Command(
 			KOMENTO_LOPETA_OHJELMA, Command.STOP, 2);
 
-	private List valikko = new List("Komponentit", Choice.IMPLICIT);
+	private List paavalikko = new List("Paavalikko", Choice.IMPLICIT);
+
+	private List piirtovalikko = new List("Piirroksen tiedot", Choice.IMPLICIT);
+
 	private Ticker liikkuvaTekstikentta = new Ticker("Hei, olen luovaRobo!");
 
-	// "syote" turha? --> työn alla tekstikenttätoteutus...
-	private TextBox syote = new TextBox("Anna pituus:", "", 16, TextField.ANY);
+	// private TextBox syote = new TextBox("Anna pituus:", "", 16,
+	// TextField.ANY);
 
 	private Alert lopetusHalytys = new Alert("Lopeta");
 
-	private Form lomake = new Form("Piirroksen tiedot?");
+	private Form lomake = new Form("Piirroksen tiedot"); // viivalle tms.
+	private Form lomake2 = new Form("Piirroksen tiedot"); // ympyrälle tms.
 
-	TextField tekstikentta = new TextField("Anna pituus:", "", 16,
+	TextField pituus = new TextField("Anna pituus:", "0", 16, TextField.ANY);
+	TextField kulmanSuuruus = new TextField("Anna kulma:", "0", 16,
 			TextField.ANY);
 
 	private Display naytto;
 
-	// vielä täysin kesken näiltä osin (rivit 131-140):
 	private NXTRegulatedMotor kynamoottori = Motor.B;
-	// kynamoottori.setSpeed(15);
 
 	private MoveController piirtaja = new DifferentialPilot(5.6f, 9.0f,
 			Motor.A, Motor.C);
-	// piirtaja.setTravelSpeed(5);
 
 	private ArcRotateMoveController ympyranPiirtaja = new DifferentialPilot(
 			5.6f, 9.0f, Motor.A, Motor.C);
-
-	// ympyranPiirtaja.setTravelSpeed(5);
 
 	public LuovaRoboUI() {
 	}
@@ -164,47 +164,68 @@ public class LuovaRoboUI implements CommandListener {
 	}
 
 	public void kaynnista(boolean polling) {
-		valikko = new List("Valitse toiminto", Choice.IMPLICIT);
-		valikko.append("Piirra viiva", null);
-		valikko.append("Piirra ympyra", null);
-		valikko.append("Piirra nelio", null);
-		valikko.append("Piirra kolmio", null);
-		valikko.addCommand(LOPETA_KOMENTO);
-		valikko.setCommandListener(this);
-		valikko.setTicker(liikkuvaTekstikentta);
+		// päävalikon toiminnot:
+		paavalikko = new List("Valitse toiminto", Choice.IMPLICIT);
+		paavalikko.append("Piirra viiva", null);
+		paavalikko.append("Piirra ympyra", null);
+		paavalikko.append("Piirra nelio", null);
+		paavalikko.append("Piirra kolmio", null);
+		paavalikko.addCommand(LOPETA_KOMENTO);
+		paavalikko.setCommandListener(this);
+		paavalikko.setTicker(liikkuvaTekstikentta);
 
-		syote.addCommand(TAKAISIN_KOMENTO);
-		syote.setCommandListener(this);
+//		// syötteen määrittely:
+//		syote.addCommand(TAKAISIN_KOMENTO);
+//		syote.setCommandListener(this);
 
-		lomake.append(tekstikentta);
+		// lomakkeen määrittely:
+		lomake.append(pituus);
 		lomake.addCommand(TAKAISIN_KOMENTO);
 		lomake.setCommandListener(this);
 
-		naytto = Display.getDisplay();
-		naytto.setCurrent(valikko);
-		annaAanimerkkiA();
+		// lomakkeen 2 määrittely:
+		lomake2.append(pituus);
+		lomake2.append(kulmanSuuruus);
+		lomake2.addCommand(TAKAISIN_KOMENTO);
+		lomake2.setCommandListener(this);
 
+		// ohjelman käynnistyksen yhteydessä tapahtuvat toimenpiteet:
+		naytto = Display.getDisplay();
+		naytto.setCurrent(paavalikko);
+
+		kynamoottori.setSpeed(15);
+		piirtaja.setTravelSpeed(5);
+		ympyranPiirtaja.setTravelSpeed(5);
+
+		annaAanimerkkiA();
 		naytto.show(polling);
 	}
 
 	public void commandAction(Command c, Displayable d) {
+		// päävalikkoon palaaminen:
 		if (c.getCommandId() == KOMENTO_TAKAISIN__ALKUUN) {
-			naytto.setCurrent(valikko);
-		} else if (c.getCommandId() == KOMENTO_LOPETA_OHJELMA) {
+			naytto.setCurrent(paavalikko);
+		}
+		// ohjelman lopettamisen varmistaminen:
+		else if (c.getCommandId() == KOMENTO_LOPETA_OHJELMA) {
 			lopetusHalytys.setType(Alert.ALERT_TYPE_CONFIRMATION);
 			lopetusHalytys.setString("Lopetetaanko?");
 			lopetusHalytys.setCommandListener(this);
 			naytto.setCurrent(lopetusHalytys);
-		} else {
+		}
 
+		else {
+			// ohjelman lopettaminen:
 			if (d == lopetusHalytys) {
 				if (lopetusHalytys.getConfirmation()) {
 					annaAanimerkkiB();
 					naytto.quit();
 				} else {
-					naytto.setCurrent(valikko);
+					naytto.setCurrent(paavalikko);
 				}
-			} else if (d == valikko) {
+			}
+			// päävalikon (+ sen toimintojen) käsittely:
+			else if (d == paavalikko) {
 				List list = (List) naytto.getCurrent();
 
 				if (list.getSelectedIndex() == 0) {
@@ -212,15 +233,15 @@ public class LuovaRoboUI implements CommandListener {
 				}
 
 				else if (list.getSelectedIndex() == 1) {
-					naytto.setCurrent(syote);
+					naytto.setCurrent(lomake2);
 				}
 
 				else if (list.getSelectedIndex() == 2) {
-					naytto.setCurrent(syote);
+					naytto.setCurrent(lomake);
 				}
 
 				else if (list.getSelectedIndex() == 3) {
-					naytto.setCurrent(syote);
+					naytto.setCurrent(lomake);
 				}
 			}
 		}
