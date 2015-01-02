@@ -1,6 +1,6 @@
 <project name="org.lejos.example" default="uploadandrun">
 	<description>
-    	org.lejos.example.HelloWorld build file
+    	LuovaRobotti's build file
     </description>
 
 	<!-- set properties for this build -->
