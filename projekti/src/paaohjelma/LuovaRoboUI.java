@@ -44,9 +44,9 @@ public class LuovaRoboUI implements CommandListener {
 	private TextBox syotaKulma = new TextBox("Anna kulma:", "", 16,
 			TextField.ANY);
 
-	// Mahdollisuus antaa oma nimi robolle:
-	private TextBox nimenVaihto = new TextBox("Anna uusi nimi:", nimi, 16,
-			TextField.ANY);
+	// // Mahdollisuus antaa oma nimi robolle (ei toimi):
+	// private TextBox nimenVaihto = new TextBox("Anna uusi nimi:", nimi, 16,
+	// TextField.ANY);
 
 	// Piirtovalikko piirtämiseen:
 	private List piirtovalikko = new List("Piirroksen piirtaminen",
@@ -89,24 +89,54 @@ public class LuovaRoboUI implements CommandListener {
 		paavalikko.append("Piirra viiva", null);
 		paavalikko.append("Piirra nelio", null);
 		paavalikko.append("Piirra kolmio", null);
-		paavalikko.append("Vaihda nimi", null); // ei toimi
+		// paavalikko.append("Vaihda nimi", null); // ei toimi
 		paavalikko.addCommand(LOPETA_KOMENTO);
 		paavalikko.setCommandListener(this);
 		paavalikko.setTicker(liikkuvaTekstikentta);
 
 		// piirtovalikon toiminnot:
 		piirtovalikko = new List("Syota arvot", Choice.IMPLICIT);
-		piirtovalikko.append("Liikuta kynaa", null);
+		if (valittuToiminto == 0) {
+			piirtovalikko.append("Syota pituus", null);
+			piirtovalikko.append("Syota kulma", null);
+			piirtovalikko.append("Piirra!", null);
+			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
+			piirtovalikko.setCommandListener(this);
+		}
+		
+		else if (valittuToiminto == 1) {
+			piirtovalikko.append("Syota pituus", null);
+			piirtovalikko.append("Piirra!", null);
+			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
+			piirtovalikko.setCommandListener(this);
+		}
+		
+		else if (valittuToiminto == 2) {
+			piirtovalikko.append("Syota pituus", null);
+			piirtovalikko.append("Syota kulma", null);
+			piirtovalikko.append("Piirra!", null);
+			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
+			piirtovalikko.setCommandListener(this);
+		}
+		
+		else if (valittuToiminto == 3) {
+			piirtovalikko.append("Syota pituus", null);
+			piirtovalikko.append("Syota kulma", null);
+			piirtovalikko.append("Piirra!", null);
+			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
+			piirtovalikko.setCommandListener(this);
+		}
+
 		piirtovalikko.append("Syota pituus", null);
 		piirtovalikko.append("Syota kulma", null);
 		piirtovalikko.append("Piirra!", null);
 		piirtovalikko.addCommand(TAKAISIN_KOMENTO);
 		piirtovalikko.setCommandListener(this);
 
-		// nimen vaihto (ei toimi vielä):
-		nimenVaihto.addCommand(TAKAISIN_KOMENTO);
-		nimenVaihto.setCommandListener(this);
-		nimi = nimenVaihto.getText();
+		// // nimen vaihto (ei toimi vielä):
+		// nimenVaihto.addCommand(TAKAISIN_KOMENTO);
+		// nimenVaihto.setCommandListener(this);
+		// nimi = nimenVaihto.getText();
 
 		// syötteen pituuden määrittely:
 		syotaPituus.addCommand(TAKAISIN_PIIRTAMAAN_KOMENTO);
@@ -160,40 +190,41 @@ public class LuovaRoboUI implements CommandListener {
 				List list = (List) naytto.getCurrent();
 
 				if (list.getSelectedIndex() == 0) {
+					valittuToiminto = 0;
 					naytto.setCurrent(piirtovalikko);
 				}
 
 				else if (list.getSelectedIndex() == 1) {
+					valittuToiminto = 1;
 					naytto.setCurrent(piirtovalikko);
 				}
 
 				else if (list.getSelectedIndex() == 2) {
+					valittuToiminto = 2;
 					naytto.setCurrent(piirtovalikko);
 				}
 
 				else if (list.getSelectedIndex() == 3) {
+					valittuToiminto = 3;
 					naytto.setCurrent(piirtovalikko);
 				}
 
-				// nimen vaihto (ei toimi vielä):
-				else if (list.getSelectedIndex() == 4) {
-					naytto.setCurrent(nimenVaihto);
-				}
+				// // nimen vaihto (ei toimi vielä):
+				// else if (list.getSelectedIndex() == 4) {
+				// naytto.setCurrent(nimenVaihto);
+				// }
 			}
 
-			// piirtovalikon toimintojen käsittely:
+			// ympyrän piirtovalikon toimintojen käsittely:
 			else if (d == piirtovalikko) {
 				List list = (List) naytto.getCurrent();
 				if (list.getSelectedIndex() == 0) {
-					kynamoottori.rotate(45);
-					kynamoottori.rotate(-45);
-				} else if (list.getSelectedIndex() == 1) {
 					naytto.setCurrent(syotaPituus);
-				} else if (list.getSelectedIndex() == 2) {
+				} else if (list.getSelectedIndex() == 1) {
 					naytto.setCurrent(syotaKulma);
-				} else if (list.getSelectedIndex() == 3) {
+				} else if (list.getSelectedIndex() == 2) {
 
-					// piirtotoiminto:
+					// ympyrän piirtotoiminto:
 					kynamoottori.rotate(45);
 
 					String pituus = syotaPituus.getText();
