@@ -22,41 +22,49 @@ import lejos.robotics.navigation.MoveController;
 public class LuovaRoboUI implements CommandListener {
 	private static final int KOMENTO_TAKAISIN_PAAVALIKKOON = 1;
 	private static final int KOMENTO_LOPETA_OHJELMA = 2;
-	private static final int KOMENTO_TAKAISIN_PIIRTOVALIKKOON = 3;
+	private static final int KOMENTO_TAKAISIN_YMPYRAN_PIIRTOVALIKKOON = 3;
+	private static final int KOMENTO_TAKAISIN_VIIVAN_PIIRTOVALIKKOON = 4;
 
 	private static final Command TAKAISIN_KOMENTO = new Command(
 			KOMENTO_TAKAISIN_PAAVALIKKOON, Command.BACK, 0);
+
 	private static final Command LOPETA_KOMENTO = new Command(
 			KOMENTO_LOPETA_OHJELMA, Command.STOP, 2);
-	private static final Command TAKAISIN_PIIRTAMAAN_KOMENTO = new Command(
-			KOMENTO_TAKAISIN_PIIRTOVALIKKOON, Command.BACK, 0);
+
+	private static final Command TAKAISIN_YMPYRAA_PIIRTAMAAN_KOMENTO = new Command(
+			KOMENTO_TAKAISIN_YMPYRAN_PIIRTOVALIKKOON, Command.BACK, 0);
+
+	private static final Command TAKAISIN_VIIVAA_PIIRTAMAAN_KOMENTO = new Command(
+			KOMENTO_TAKAISIN_VIIVAN_PIIRTOVALIKKOON, Command.BACK, 0);
 
 	// Päävalikkoon liittyviä komponentteja:
 	private String nimi = "LuovaRobo"; // oletusnimi
-	private int valittuToiminto;
 	private List paavalikko = new List("Paavalikko", Choice.IMPLICIT);
 	private Ticker liikkuvaTekstikentta = new Ticker("Hei, olen " + nimi + "!");
 	private Alert lopetusHalytys = new Alert("Lopeta");
 
-	// Piirtotoimintoa varten arvojen syöttö:
-	private TextBox syotaPituus = new TextBox("Anna pituus:", "", 16,
+	// Piirtotoimintoja varten arvojen syötöt:
+	private TextBox syotaYmpyranKaarenPituus = new TextBox("Anna pituus:", "",
+			16, TextField.ANY);
+	private TextBox syotaYmpyranKulma = new TextBox("Anna kulma:", "", 16,
 			TextField.ANY);
-	private TextBox syotaKulma = new TextBox("Anna kulma:", "", 16,
+	private TextBox syotaViivanPituus = new TextBox("Anna pituus:", "", 16,
 			TextField.ANY);
 
-	// // Mahdollisuus antaa oma nimi robolle (ei toimi):
-	// private TextBox nimenVaihto = new TextBox("Anna uusi nimi:", nimi, 16,
-	// TextField.ANY);
+	// Piirtovalikko ympyrän piirtämiseen:
+	private List ympyranPiirtovalikko = new List("Ympyran piirtaminen",
+			Choice.IMPLICIT);
 
-	// Piirtovalikko piirtämiseen:
-	private List piirtovalikko = new List("Piirroksen piirtaminen",
+	// Piirtovalikko viivojen piirtämiseen:
+	private List viivanPiirtovalikko = new List("Viivan piirtaminen",
 			Choice.IMPLICIT);
 
 	private Display naytto;
 
+	// Robotin moottoreiden alustamiset:
 	private NXTRegulatedMotor kynamoottori = Motor.B;
 
-	private MoveController robonPyorat = new DifferentialPilot(5.6f, 9.0f,
+	private MoveController piirtaja = new DifferentialPilot(5.6f, 9.0f,
 			Motor.A, Motor.C);
 
 	private ArcRotateMoveController ympyranPiirtaja = new DifferentialPilot(
@@ -65,109 +73,103 @@ public class LuovaRoboUI implements CommandListener {
 	public LuovaRoboUI() {
 	}
 
-	// käynnistysääni:
-	private void annaAanimerkkiA() {
+	// Käynnistysääni:
+	private void kaynnistysaanimerkki() {
 		Sound.playNote(Sound.FLUTE, 523, 125);
 		Sound.playNote(Sound.FLUTE, 659, 125);
 		Sound.playNote(Sound.FLUTE, 784, 125);
 		Sound.playNote(Sound.FLUTE, 1047, 500);
 	}
 
-	// lopetusääni:
-	private void annaAanimerkkiB() {
+	// Lopetusääni:
+	private void lopetusaanimerkki() {
 		Sound.playNote(Sound.FLUTE, 1047, 125);
 		Sound.playNote(Sound.FLUTE, 784, 125);
 		Sound.playNote(Sound.FLUTE, 659, 125);
 		Sound.playNote(Sound.FLUTE, 523, 500);
 	}
 
+	// Piirtämisen yhteydessä kuultava äänimerkki:
+	private void piirtamisaanimerkki() {
+		Sound.playNote(Sound.PIANO, 1047, 250);
+		Sound.playNote(Sound.PIANO, 784, 125);
+		Sound.playNote(Sound.PIANO, 784, 125);
+		Sound.playNote(Sound.PIANO, 880, 125);
+		Sound.playNote(Sound.PIANO, 784, 125);
+		Sound.pause(125);
+		Sound.playNote(Sound.PIANO, 988, 125);
+		Sound.playNote(Sound.PIANO, 1047, 250);
+	}
+
 	public void kaynnista(boolean polling) {
 
-		// päävalikon toiminnot:
+		// Päävalikon toimintojen asettaminen:
 		paavalikko = new List("Valitse toiminto", Choice.IMPLICIT);
 		paavalikko.append("Piirra ympyra", null);
 		paavalikko.append("Piirra viiva", null);
 		paavalikko.append("Piirra nelio", null);
 		paavalikko.append("Piirra kolmio", null);
-		// paavalikko.append("Vaihda nimi", null); // ei toimi
 		paavalikko.addCommand(LOPETA_KOMENTO);
 		paavalikko.setCommandListener(this);
 		paavalikko.setTicker(liikkuvaTekstikentta);
 
-		// piirtovalikon toiminnot:
-		piirtovalikko = new List("Syota arvot", Choice.IMPLICIT);
-		if (valittuToiminto == 0) {
-			piirtovalikko.append("Syota pituus", null);
-			piirtovalikko.append("Syota kulma", null);
-			piirtovalikko.append("Piirra!", null);
-			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
-			piirtovalikko.setCommandListener(this);
-		}
-		
-		else if (valittuToiminto == 1) {
-			piirtovalikko.append("Syota pituus", null);
-			piirtovalikko.append("Piirra!", null);
-			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
-			piirtovalikko.setCommandListener(this);
-		}
-		
-		else if (valittuToiminto == 2) {
-			piirtovalikko.append("Syota pituus", null);
-			piirtovalikko.append("Syota kulma", null);
-			piirtovalikko.append("Piirra!", null);
-			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
-			piirtovalikko.setCommandListener(this);
-		}
-		
-		else if (valittuToiminto == 3) {
-			piirtovalikko.append("Syota pituus", null);
-			piirtovalikko.append("Syota kulma", null);
-			piirtovalikko.append("Piirra!", null);
-			piirtovalikko.addCommand(TAKAISIN_KOMENTO);
-			piirtovalikko.setCommandListener(this);
-		}
+		// Ympyrän piirtovalikon toimintojen asettaminen:
+		ympyranPiirtovalikko = new List("Syota arvot", Choice.IMPLICIT);
+		ympyranPiirtovalikko.append("Syota pituus", null);
+		ympyranPiirtovalikko.append("Syota kulma", null);
+		ympyranPiirtovalikko.append("Piirra!", null);
+		ympyranPiirtovalikko.addCommand(TAKAISIN_KOMENTO);
+		ympyranPiirtovalikko.setCommandListener(this);
 
-		piirtovalikko.append("Syota pituus", null);
-		piirtovalikko.append("Syota kulma", null);
-		piirtovalikko.append("Piirra!", null);
-		piirtovalikko.addCommand(TAKAISIN_KOMENTO);
-		piirtovalikko.setCommandListener(this);
+		// Viivan piirtovalikon toimintojen asettaminen:
+		viivanPiirtovalikko = new List("Syota arvot", Choice.IMPLICIT);
+		viivanPiirtovalikko.append("Syota pituus", null);
+		viivanPiirtovalikko.append("Piirra!", null);
+		viivanPiirtovalikko.addCommand(TAKAISIN_KOMENTO);
+		viivanPiirtovalikko.setCommandListener(this);
 
-		// // nimen vaihto (ei toimi vielä):
-		// nimenVaihto.addCommand(TAKAISIN_KOMENTO);
-		// nimenVaihto.setCommandListener(this);
-		// nimi = nimenVaihto.getText();
+		// Ympyran kaaren pituus-syötteen määrittely:
+		syotaYmpyranKaarenPituus
+				.addCommand(TAKAISIN_YMPYRAA_PIIRTAMAAN_KOMENTO);
+		syotaYmpyranKaarenPituus.setCommandListener(this);
 
-		// syötteen pituuden määrittely:
-		syotaPituus.addCommand(TAKAISIN_PIIRTAMAAN_KOMENTO);
-		syotaPituus.setCommandListener(this);
+		// Ympyrän kulma-syötteen määrittely:
+		syotaYmpyranKulma.addCommand(TAKAISIN_YMPYRAA_PIIRTAMAAN_KOMENTO);
+		syotaYmpyranKulma.setCommandListener(this);
 
-		// syötteen kulman määrittely:
-		syotaKulma.addCommand(TAKAISIN_PIIRTAMAAN_KOMENTO);
-		syotaKulma.setCommandListener(this);
+		// Viivan pituus-syötteen määrittely:
+		syotaViivanPituus.addCommand(TAKAISIN_VIIVAA_PIIRTAMAAN_KOMENTO);
+		syotaViivanPituus.setCommandListener(this);
 
-		// ohjelman käynnistyksen yhteydessä tapahtuvat toimenpiteet:
+		// Ohjelman käynnistyksen yhteydessä tapahtuvat toimenpiteet:
 		naytto = Display.getDisplay();
 		naytto.setCurrent(paavalikko);
 
 		kynamoottori.setSpeed(15);
-		robonPyorat.setTravelSpeed(5);
+		piirtaja.setTravelSpeed(5);
 		ympyranPiirtaja.setTravelSpeed(5);
 
-		annaAanimerkkiA();
+		kaynnistysaanimerkki();
 		naytto.show(polling);
 	}
 
 	public void commandAction(Command c, Displayable d) {
-		// päävalikkoon palaaminen:
+		int toiminto = 0;
+
+		// Päävalikkoon palaaminen:
 		if (c.getCommandId() == KOMENTO_TAKAISIN_PAAVALIKKOON) {
 			naytto.setCurrent(paavalikko);
 		}
-		// piirtovalikkoon palaaminen:
-		else if (c.getCommandId() == KOMENTO_TAKAISIN_PIIRTOVALIKKOON) {
-			naytto.setCurrent(piirtovalikko);
+		// Ympyrän piirtovalikkoon palaaminen:
+		else if (c.getCommandId() == KOMENTO_TAKAISIN_YMPYRAN_PIIRTOVALIKKOON) {
+			naytto.setCurrent(ympyranPiirtovalikko);
 		}
-		// ohjelman lopettamisen varmistaminen:
+		// Viivan piirtovalikkoon palaaminen:
+		else if (c.getCommandId() == KOMENTO_TAKAISIN_VIIVAN_PIIRTOVALIKKOON) {
+			naytto.setCurrent(viivanPiirtovalikko);
+		}
+
+		// Ohjelman lopettamisen varmistaminen:
 		else if (c.getCommandId() == KOMENTO_LOPETA_OHJELMA) {
 			lopetusHalytys.setType(Alert.ALERT_TYPE_CONFIRMATION);
 			lopetusHalytys.setString("Lopetetaanko?");
@@ -176,65 +178,102 @@ public class LuovaRoboUI implements CommandListener {
 		}
 
 		else {
-			// ohjelman lopettaminen:
+			// Ohjelman lopettaminen:
 			if (d == lopetusHalytys) {
 				if (lopetusHalytys.getConfirmation()) {
-					annaAanimerkkiB();
+					lopetusaanimerkki();
 					naytto.quit();
 				} else {
 					naytto.setCurrent(paavalikko);
 				}
 			}
-			// päävalikon toimintojen käsittely:
+			// Päävalikon toimintojen käsittely:
 			else if (d == paavalikko) {
 				List list = (List) naytto.getCurrent();
 
+				// Ympyrän piirto:
 				if (list.getSelectedIndex() == 0) {
-					valittuToiminto = 0;
-					naytto.setCurrent(piirtovalikko);
+					naytto.setCurrent(ympyranPiirtovalikko);
 				}
-
+				// Viivan piirto:
 				else if (list.getSelectedIndex() == 1) {
-					valittuToiminto = 1;
-					naytto.setCurrent(piirtovalikko);
+					toiminto = 0;
+					naytto.setCurrent(viivanPiirtovalikko);
 				}
-
+				// Neliön piirto:
 				else if (list.getSelectedIndex() == 2) {
-					valittuToiminto = 2;
-					naytto.setCurrent(piirtovalikko);
+					toiminto = 1;
+					naytto.setCurrent(viivanPiirtovalikko);
 				}
-
+				// Kolmion piirto:
 				else if (list.getSelectedIndex() == 3) {
-					valittuToiminto = 3;
-					naytto.setCurrent(piirtovalikko);
+					toiminto = 2;
+					naytto.setCurrent(viivanPiirtovalikko);
 				}
-
-				// // nimen vaihto (ei toimi vielä):
-				// else if (list.getSelectedIndex() == 4) {
-				// naytto.setCurrent(nimenVaihto);
-				// }
 			}
 
-			// ympyrän piirtovalikon toimintojen käsittely:
-			else if (d == piirtovalikko) {
+			// Ympyrän piirtovalikon toimintojen käsittely:
+			else if (d == ympyranPiirtovalikko) {
 				List list = (List) naytto.getCurrent();
-				if (list.getSelectedIndex() == 0) {
-					naytto.setCurrent(syotaPituus);
-				} else if (list.getSelectedIndex() == 1) {
-					naytto.setCurrent(syotaKulma);
-				} else if (list.getSelectedIndex() == 2) {
 
-					// ympyrän piirtotoiminto:
+				// Pituus:
+				if (list.getSelectedIndex() == 0) {
+					naytto.setCurrent(syotaYmpyranKaarenPituus);
+				}
+				// Kulma:
+				else if (list.getSelectedIndex() == 1) {
+					naytto.setCurrent(syotaYmpyranKulma);
+				}
+				// Piirtotoiminnon käynnistys:
+				else if (list.getSelectedIndex() == 2) {
+					piirtamisaanimerkki();
 					kynamoottori.rotate(45);
 
-					String pituus = syotaPituus.getText();
+					String pituus = syotaYmpyranKaarenPituus.getText();
 					double pituusLukuna = Double.parseDouble(pituus);
 
-					String kulma = syotaKulma.getText();
+					String kulma = syotaYmpyranKulma.getText();
 					double kulmaLukuna = Double.parseDouble(kulma);
 
 					ympyranPiirtaja.arc(pituusLukuna, kulmaLukuna);
 					kynamoottori.rotate(-45);
+					piirtamisaanimerkki();
+				}
+			}
+			// Viivan piirtovalikon toimintojen käsittely:
+			else if (d == viivanPiirtovalikko) {
+				List list = (List) naytto.getCurrent();
+
+				// Pituus:
+				if (list.getSelectedIndex() == 0) {
+					naytto.setCurrent(syotaViivanPituus);
+				}
+
+				// Piirtotoiminnon käynnistys:
+				else if (list.getSelectedIndex() == 1) {
+					piirtamisaanimerkki();
+					kynamoottori.rotate(45);
+
+					String pituus = syotaViivanPituus.getText();
+					double pituusLukuna = Double.parseDouble(pituus);
+
+					// Viiva:
+					if (toiminto == 0) {
+						piirtaja.travel(pituusLukuna);
+						kynamoottori.rotate(-45);
+						piirtamisaanimerkki();
+					}
+					// Neliö:
+					else if (toiminto == 1) {
+						kynamoottori.rotate(-45);
+						piirtamisaanimerkki();
+					}
+					// Kolmio:
+					else if (toiminto == 2) {
+						kynamoottori.rotate(-45);
+						piirtamisaanimerkki();
+						piirtamisaanimerkki();
+					}
 				}
 			}
 		}
