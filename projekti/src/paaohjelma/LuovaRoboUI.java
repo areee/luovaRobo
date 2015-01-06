@@ -84,7 +84,7 @@ public class LuovaRoboUI implements CommandListener {
 //	private MoveController piirtaja = new DifferentialPilot(5.6f, 9.0f,
 //			Motor.A, Motor.C);
 
-	private ArcRotateMoveController ympyranPiirtaja = new DifferentialPilot(
+	private ArcRotateMoveController piirtaja = new DifferentialPilot(
 			5.6f, 9.0f, Motor.A, Motor.C);
 
 	public LuovaRoboUI() {
@@ -190,8 +190,8 @@ public class LuovaRoboUI implements CommandListener {
 
 		kynamoottori.setSpeed(15);
 //		piirtaja.setTravelSpeed(5);
-		ympyranPiirtaja.setTravelSpeed(5);
-		ympyranPiirtaja.setRotateSpeed(15);
+		piirtaja.setTravelSpeed(5);
+		piirtaja.setRotateSpeed(15);
 
 		kaynnistysaani();
 		naytto.show(polling);
@@ -282,7 +282,7 @@ public class LuovaRoboUI implements CommandListener {
 
 					piirtaminenAlkaaAani();
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.arc(pituusLukuna, kulmaLukuna);
+					piirtaja.arc(pituusLukuna, kulmaLukuna);
 					kynamoottori.rotate(-45);
 					piirtaminenValmisAani();
 				}
@@ -303,7 +303,7 @@ public class LuovaRoboUI implements CommandListener {
 
 					piirtaminenAlkaaAani();
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
 					piirtaminenValmisAani();
 				}
@@ -324,24 +324,24 @@ public class LuovaRoboUI implements CommandListener {
 
 					piirtaminenAlkaaAani();
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
-					ympyranPiirtaja.rotate(90);
+					piirtaja.rotate(180);
 
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
-					ympyranPiirtaja.rotate(90);
+					piirtaja.rotate(180);
 
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
-					ympyranPiirtaja.rotate(90);
+					piirtaja.rotate(180);
 
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
-//					ympyranPiirtaja.rotate(90);
+					piirtaja.rotate(180);
 					piirtaminenValmisAani();
 				}
 			}
@@ -361,19 +361,19 @@ public class LuovaRoboUI implements CommandListener {
 
 					piirtaminenAlkaaAani();
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
-					ympyranPiirtaja.rotate(60);
+					piirtaja.rotate(120);
 
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
-					ympyranPiirtaja.rotate(60);
+					piirtaja.rotate(120);
 
 					kynamoottori.rotate(45);
-					ympyranPiirtaja.travel(pituusLukuna);
+					piirtaja.travel(pituusLukuna);
 					kynamoottori.rotate(-45);
-//					ympyranPiirtaja.rotate(60);
+					piirtaja.rotate(120);
 					piirtaminenValmisAani();
 				}
 			}
