@@ -17,7 +17,6 @@ import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.Sound;
 import lejos.robotics.navigation.ArcRotateMoveController;
 import lejos.robotics.navigation.DifferentialPilot;
-import lejos.robotics.navigation.MoveController;
 
 public class LuovaRoboUI implements CommandListener {
 	// Komentojen tunnisteet:
@@ -81,11 +80,8 @@ public class LuovaRoboUI implements CommandListener {
 	// Robotin moottoreiden alustamiset:
 	private NXTRegulatedMotor kynamoottori = Motor.B;
 
-//	private MoveController piirtaja = new DifferentialPilot(5.6f, 9.0f,
-//			Motor.A, Motor.C);
-
-	private ArcRotateMoveController piirtaja = new DifferentialPilot(
-			5.6f, 9.0f, Motor.A, Motor.C);
+	private ArcRotateMoveController piirtaja = new DifferentialPilot(5.6f,
+			12.3f, Motor.A, Motor.C);
 
 	public LuovaRoboUI() {
 	}
@@ -106,7 +102,7 @@ public class LuovaRoboUI implements CommandListener {
 		Sound.playNote(Sound.FLUTE, 523, 500);
 	}
 
-	// Piirtämisen yhteydessä kuultava äänimerkki:
+	// Piirtämisen valmistuttua kuultava äänimerkki:
 	private void piirtaminenValmisAani() { // 500 = 1/4-nuotti
 		Sound.playNote(Sound.PIANO, 1047, 250);// 1/8
 		Sound.playNote(Sound.PIANO, 784, 125);// 1/16
@@ -117,8 +113,9 @@ public class LuovaRoboUI implements CommandListener {
 		Sound.playNote(Sound.PIANO, 988, 250);// 1/8
 		Sound.playNote(Sound.PIANO, 1047, 500);// 1/4
 	}
-	
-	private void piirtaminenAlkaaAani(){
+
+	// Piirtämisen alkamisen äänimerkki:
+	private void piirtaminenAlkaaAani() {
 		Sound.playNote(Sound.FLUTE, 523, 500);
 		Sound.pause(500);
 		Sound.playNote(Sound.FLUTE, 523, 500);
@@ -189,7 +186,6 @@ public class LuovaRoboUI implements CommandListener {
 		naytto.setCurrent(paavalikko);
 
 		kynamoottori.setSpeed(15);
-//		piirtaja.setTravelSpeed(5);
 		piirtaja.setTravelSpeed(5);
 		piirtaja.setRotateSpeed(15);
 
@@ -275,15 +271,16 @@ public class LuovaRoboUI implements CommandListener {
 				// Piirtotoiminnon käynnistys:
 				else if (list.getSelectedIndex() == 2) {
 					String pituus = syotaYmpyranKaarenPituus.getText();
-					double pituusLukuna = Double.parseDouble("-"+pituus);
+					double pituusLukuna = Double.parseDouble("-" + pituus);
 
 					String kulma = syotaYmpyranKulma.getText();
 					double kulmaLukuna = Double.parseDouble(kulma);
 
 					piirtaminenAlkaaAani();
-					kynamoottori.rotate(45);
+					laskeKyna();
 					piirtaja.arc(pituusLukuna, kulmaLukuna);
-					kynamoottori.rotate(-45);
+					nostaKyna();
+					naytto.setCurrent(paavalikko);
 					piirtaminenValmisAani();
 				}
 			}
@@ -299,12 +296,13 @@ public class LuovaRoboUI implements CommandListener {
 				// Piirtotoiminnon käynnistys:
 				else if (list.getSelectedIndex() == 1) {
 					String pituus = syotaViivanPituus.getText();
-					double pituusLukuna = Double.parseDouble("-"+pituus);
+					double pituusLukuna = Double.parseDouble("-" + pituus);
 
 					piirtaminenAlkaaAani();
-					kynamoottori.rotate(45);
+					laskeKyna();
 					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
+					nostaKyna();
+					naytto.setCurrent(paavalikko);
 					piirtaminenValmisAani();
 				}
 			}
@@ -320,33 +318,12 @@ public class LuovaRoboUI implements CommandListener {
 				// Piirtotoiminnon käynnistys:
 				else if (list.getSelectedIndex() == 1) {
 					String pituus = syotaNelionSivunPituus.getText();
-					double pituusLukuna = Double.parseDouble("-"+pituus);
-
-					piirtaminenAlkaaAani();
-					kynamoottori.rotate(45);
-					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
-					piirtaja.rotate(180);
-
-					kynamoottori.rotate(45);
-					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
-					piirtaja.rotate(180);
-
-					kynamoottori.rotate(45);
-					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
-					piirtaja.rotate(180);
-
-					kynamoottori.rotate(45);
-					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
-					piirtaja.rotate(180);
-					piirtaminenValmisAani();
+					double pituusLukuna = Double.parseDouble("-" + pituus);
+					monikulmionPiirtaminen(pituusLukuna, 4, 90);
 				}
 			}
 
-			// Kolmion piirtovalikon toimintojen käsittely:
+			// Tasasivuisen kolmion piirtovalikon toimintojen käsittely:
 			else if (d == kolmionPiirtovalikko) {
 				List list = (List) naytto.getCurrent();
 
@@ -357,27 +334,39 @@ public class LuovaRoboUI implements CommandListener {
 				// Piirtotoiminnon käynnistys:
 				else if (list.getSelectedIndex() == 1) {
 					String pituus = syotaKolmionSivunPituus.getText();
-					double pituusLukuna = Double.parseDouble("-"+pituus);
-
-					piirtaminenAlkaaAani();
-					kynamoottori.rotate(45);
-					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
-					piirtaja.rotate(120);
-
-					kynamoottori.rotate(45);
-					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
-					piirtaja.rotate(120);
-
-					kynamoottori.rotate(45);
-					piirtaja.travel(pituusLukuna);
-					kynamoottori.rotate(-45);
-					piirtaja.rotate(120);
-					piirtaminenValmisAani();
+					double pituusLukuna = Double.parseDouble("-" + pituus);
+					// kulma: 90°+30° (60°:n vieruskulma)
+					monikulmionPiirtaminen(pituusLukuna, 3, 120);
 				}
 			}
 		}
+	}
+
+	private void monikulmionPiirtaminen(double pituusLukuna, int montakoKulmaa,
+			int kulma) {
+		piirtaminenAlkaaAani();
+		for (int i = 0; i < montakoKulmaa; i++) {
+
+			// kynän ja takapyörien etäisyys:
+			double etaisyys = 22;
+
+			laskeKyna();
+			piirtaja.travel(pituusLukuna);
+			nostaKyna();
+			piirtaja.travel(etaisyys);
+			piirtaja.rotate(kulma);
+			piirtaja.travel(-etaisyys);
+		}
+		naytto.setCurrent(paavalikko);
+		piirtaminenValmisAani();
+	}
+
+	private void nostaKyna() {
+		kynamoottori.rotate(-60);
+	}
+
+	private void laskeKyna() {
+		kynamoottori.rotate(60);
 	}
 
 	public static void main(String[] args) {
