@@ -1,7 +1,6 @@
 package main;
+
 // Pohjautuu esimerkkien LCDUI:iin, jota lähdin muokkaamaan haluamakseni
-
-
 
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.Choice;
@@ -27,6 +26,7 @@ public class Main implements CommandListener {
 	private static final int KOMENTO_TAKAISIN_VIIVAN_PIIRTOVALIKKOON = 4;
 	private static final int KOMENTO_TAKAISIN_NELION_PIIRTOVALIKKOON = 5;
 	private static final int KOMENTO_TAKAISIN_KOLMION_PIIRTOVALIKKOON = 6;
+	private static final int KOMENTO_TAKAISIN_MONIKULMION_PIIRTOVALIKKOON = 7;
 
 	// Komennot:
 	private static final Command TAKAISIN_KOMENTO = new Command(
@@ -47,6 +47,9 @@ public class Main implements CommandListener {
 	private static final Command TAKAISIN_KOLMIOTA_PIIRTAMAAN_KOMENTO = new Command(
 			KOMENTO_TAKAISIN_KOLMION_PIIRTOVALIKKOON, Command.BACK, 0);
 
+	private static final Command TAKAISIN_MONIKULMIOTA_PIIRTAMAAN_KOMENTO = new Command(
+			KOMENTO_TAKAISIN_MONIKULMION_PIIRTOVALIKKOON, Command.BACK, 0);
+
 	// Päävalikkoon liittyviä komponentteja:
 	private String nimi = "LuovaRobo"; // oletusnimi
 	private List paavalikko = new List("Paavalikko", Choice.IMPLICIT);
@@ -57,14 +60,24 @@ public class Main implements CommandListener {
 	// Piirtotoimintoja varten arvojen syötöt:
 	private TextBox syotaYmpyranKaarenPituus = new TextBox("Kaaren pituus?",
 			"", 3, TextField.ANY);
+
 	private TextBox syotaYmpyranKulma = new TextBox("Ympyran kulma?", "", 3,
 			TextField.ANY);
+
 	private TextBox syotaViivanPituus = new TextBox("Viivan pituus?", "", 3,
 			TextField.ANY);
+
 	private TextBox syotaNelionSivunPituus = new TextBox("Nelion sivu?", "", 3,
 			TextField.ANY);
+
 	private TextBox syotaKolmionSivunPituus = new TextBox("Kolmion sivu?", "",
 			3, TextField.ANY);
+
+	private TextBox syotaMonikulmionSivunPituus = new TextBox(
+			"Monikulmion sivu?", "", 3, TextField.ANY);
+
+	private TextBox syotaMontakoKulmaaMonikulmiossa = new TextBox(
+			"Montako kulmaa?", "", 2, TextField.ANY);
 
 	// Piirtovalikot piirtämistoimintoihin:
 	private List ympyranPiirtovalikko = new List("Ympyran piirtaminen",
@@ -74,6 +87,8 @@ public class Main implements CommandListener {
 	private List nelionPiirtovalikko = new List("Nelion piirtaminen",
 			Choice.IMPLICIT);
 	private List kolmionPiirtovalikko = new List("Kolmion piirtaminen",
+			Choice.IMPLICIT);
+	private List monikulmionPiirtovalikko = new List("Monikulmion piirtaminen",
 			Choice.IMPLICIT);
 
 	private Display naytto;
@@ -134,6 +149,7 @@ public class Main implements CommandListener {
 		paavalikko.append("Piirra viiva", null);
 		paavalikko.append("Piirra nelio", null);
 		paavalikko.append("Piirra kolmio", null);
+		paavalikko.append("Piirra monikulmio", null);
 		paavalikko.addCommand(LOPETA_KOMENTO);
 		paavalikko.setCommandListener(this);
 		paavalikko.setTicker(liikkuvaTekstikentta);
@@ -164,6 +180,13 @@ public class Main implements CommandListener {
 		kolmionPiirtovalikko.addCommand(TAKAISIN_KOMENTO);
 		kolmionPiirtovalikko.setCommandListener(this);
 
+		monikulmionPiirtovalikko = new List("Monikulmio", Choice.IMPLICIT);
+		monikulmionPiirtovalikko.append("Syota pituus", null);
+		monikulmionPiirtovalikko.append("Syota kulmien lkm", null);
+		monikulmionPiirtovalikko.append("Piirra!", null);
+		monikulmionPiirtovalikko.addCommand(TAKAISIN_KOMENTO);
+		monikulmionPiirtovalikko.setCommandListener(this);
+
 		// Syötteiden määrittely:
 		syotaYmpyranKaarenPituus
 				.addCommand(TAKAISIN_YMPYRAA_PIIRTAMAAN_KOMENTO);
@@ -181,6 +204,14 @@ public class Main implements CommandListener {
 		syotaKolmionSivunPituus
 				.addCommand(TAKAISIN_KOLMIOTA_PIIRTAMAAN_KOMENTO);
 		syotaKolmionSivunPituus.setCommandListener(this);
+
+		syotaMonikulmionSivunPituus
+				.addCommand(TAKAISIN_MONIKULMIOTA_PIIRTAMAAN_KOMENTO);
+		syotaMonikulmionSivunPituus.setCommandListener(this);
+
+		syotaMontakoKulmaaMonikulmiossa
+				.addCommand(TAKAISIN_MONIKULMIOTA_PIIRTAMAAN_KOMENTO);
+		syotaMontakoKulmaaMonikulmiossa.setCommandListener(this);
 
 		// Ohjelman käynnistyksen yhteydessä tapahtuvat toimenpiteet:
 		naytto = Display.getDisplay();
@@ -215,6 +246,10 @@ public class Main implements CommandListener {
 
 		else if (c.getCommandId() == KOMENTO_TAKAISIN_KOLMION_PIIRTOVALIKKOON) {
 			naytto.setCurrent(kolmionPiirtovalikko);
+		}
+
+		else if (c.getCommandId() == KOMENTO_TAKAISIN_MONIKULMION_PIIRTOVALIKKOON) {
+			naytto.setCurrent(monikulmionPiirtovalikko);
 		}
 
 		// Ohjelman lopettamisen varmistaminen:
@@ -254,6 +289,8 @@ public class Main implements CommandListener {
 
 				else if (list.getSelectedIndex() == 3) {
 					naytto.setCurrent(kolmionPiirtovalikko);
+				} else if (list.getSelectedIndex() == 4) {
+					naytto.setCurrent(monikulmionPiirtovalikko);
 				}
 			}
 
@@ -338,6 +375,53 @@ public class Main implements CommandListener {
 					double pituusLukuna = Double.parseDouble("-" + pituus);
 					// kulma: 90°+30° (60°:n vieruskulma)
 					monikulmionPiirtaminen(pituusLukuna, 3, 120);
+				}
+			}
+
+			// Säännöllisen monikulmion piirtovalikon toimintojen käsittely:
+			else if (d == monikulmionPiirtovalikko) {
+				List list = (List) naytto.getCurrent();
+
+				if (list.getSelectedIndex() == 0) {
+					naytto.setCurrent(syotaMonikulmionSivunPituus);
+				}
+
+				else if (list.getSelectedIndex() == 1) {
+					naytto.setCurrent(syotaMontakoKulmaaMonikulmiossa);
+				}
+
+				// Piirtotoiminnon käynnistys:
+				else if (list.getSelectedIndex() == 2) {
+					String pituus = syotaMonikulmionSivunPituus.getText();
+					double pituusLukuna = Double.parseDouble("-" + pituus);
+
+					String kulmia = syotaMontakoKulmaaMonikulmiossa.getText();
+					int kulmatLukuna = Integer.parseInt(kulmia);
+
+					int kulma = (kulmatLukuna - 2) * 180 / kulmatLukuna;
+
+					int piirroksenKaannos = 0;
+
+					if (kulma < 90) {
+						piirroksenKaannos = 90 + kulma;
+						monikulmionPiirtaminen(pituusLukuna, kulmatLukuna,
+								piirroksenKaannos);
+					}
+
+					else if (kulma == 90) {
+						piirroksenKaannos = 90;
+						monikulmionPiirtaminen(pituusLukuna, kulmatLukuna,
+								piirroksenKaannos);
+					}
+
+					else if (kulma > 90) {
+						piirroksenKaannos = 180 - kulma;
+						// esim. 5-kulmio: kulma 108, piirroksenKaannos 72
+						monikulmionPiirtaminen(pituusLukuna, kulmatLukuna,
+								piirroksenKaannos);
+					}
+
+					
 				}
 			}
 		}
