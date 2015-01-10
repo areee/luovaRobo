@@ -1,7 +1,6 @@
 package main;
+
 // Vanha, käytöstä poistettu main-luokka. Tästä koko projekti lähti...
-
-
 
 import lejos.nxt.*;
 import lejos.robotics.navigation.*;
@@ -27,6 +26,7 @@ public class VanhaMain {
 		annaAanimerkkiA();
 		kynamoottori.rotate(45);
 
+		// ensimmäinen, ei-toimiva toteutus käyttöliittymästä ("ajatelma"):
 		while (true) {
 			System.out.println("Mita haluat minun piirtavan?");
 
