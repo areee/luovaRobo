@@ -9,4 +9,4 @@
 	- viivat eivät osu kunnolla kohdilleen
 
 ## Loppuraportti
-* tähän laitan linkin loppuraporttiin
+* [tässä](http://www.cs.helsinki.fi/u/ylhavuor/Loppuraportti.pdf) linkki loppuraporttiin
